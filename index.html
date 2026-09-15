@@ -982,12 +982,28 @@ td small{display:block;color:var(--mute);font-size:12px;margin-top:2px}
   /* 10 clock counts down from 24h briskly */
   const clock=document.getElementById('clock');let cOn=false;
   document.getElementById('s10').addEventListener('enter',()=>{if(cOn||reduce)return;cOn=true;let s=24*3600;const iv=setInterval(()=>{s-=137;if(s<=0){s=0;clearInterval(iv)}const h=Math.floor(s/3600),m=Math.floor(s%3600/60),sec=s%60;clock.textContent=`${pad(h)}:${pad(m)}:${pad(sec)}`},40)});
-  /* CV modal: shows the embedded PDF without top-frame data: navigation (which Chrome blocks) */
+  /* CV modal: converts the embedded data: PDF to a blob: URL (data: URLs are blocked by Chrome for top-frame/new-tab navigation, and render at actual size instead of fit-to-width in mobile PDF viewers). On mobile, skips the iframe modal and opens the blob in the OS's native full-page PDF viewer, which fits width correctly. */
   (function(){
     const cvBtn=document.getElementById('opencv'),cvModal=document.getElementById('cvmodal'),cvFrame=document.getElementById('cvframe'),cvClose=document.getElementById('cvclose');
     if(!cvBtn)return;
-    const cvSrc=cvBtn.getAttribute('href');
-    function openCv(e){e.preventDefault();if(!cvFrame.getAttribute('src'))cvFrame.setAttribute('src',cvSrc);cvModal.classList.add('open')}
+    let cvUrl=null;
+    function getCvUrl(){
+      if(cvUrl)return cvUrl;
+      const dataUri=cvBtn.getAttribute('href');
+      const base64=dataUri.slice(dataUri.indexOf(',')+1);
+      const bin=atob(base64);
+      const bytes=new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+      cvUrl=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+      return cvUrl;
+    }
+    function openCv(e){
+      e.preventDefault();
+      const url=getCvUrl();
+      if(matchMedia('(max-width:820px)').matches){window.open(url,'_blank');return}
+      if(!cvFrame.getAttribute('src'))cvFrame.setAttribute('src',url+'#view=FitH');
+      cvModal.classList.add('open');
+    }
     function closeCv(){cvModal.classList.remove('open')}
     cvBtn.addEventListener('click',openCv);
     cvClose.addEventListener('click',closeCv);
