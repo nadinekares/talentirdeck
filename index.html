@@ -124,6 +124,7 @@ h3{font-size:clamp(17px,1.6vw,22px);font-weight:600;letter-spacing:-.01em}
 .stream .row:nth-child(3){top:89%;animation:slide 52s linear infinite}
 @keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @media (max-width:820px){.stream .row:nth-child(1){top:12%}}
+@media (min-width:821px) and (max-height:880px){.stream .row:nth-child(1){top:24%}.stream .row:nth-child(2){display:none}.stream .row:nth-child(3){top:auto;bottom:4%}}
 
 /* ---------- 02 pains ---------- */
 .pains{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line);margin-top:8px}
